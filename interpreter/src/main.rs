@@ -1,3 +1,4 @@
+// Rebecca
 enum Primitive {
     Add,
     Multiply,
@@ -23,11 +24,7 @@ fn evaluate(primitives: Vec<Primitive>) -> i32 {
 
 fn main() {
 
-    let mut primitives = Vec::<Primitive>::new();
-    primitives.push(Primitive::Multiply);
-    primitives.push(Primitive::Number(3));
-    primitives.push(Primitive::Number(4));
-    let result = evaluate(primitives);
-    println!("The result is {result}");
+    let result: bool = true;
+    println!("{result}")
 
 }
