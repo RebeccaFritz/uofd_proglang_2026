@@ -4,6 +4,7 @@ pub enum Expression {
     Add(Vec<Expression>),
     Subtract(Vec<Expression>),
     Multiply(Vec<Expression>),
+    Divide(Vec<Expression>),
     Variable(String),
     Number(i32)
 }
@@ -47,6 +48,19 @@ pub fn evaluate_multiplication(mult: &Expression, environment: &Environment) -> 
     }
 }
 
+pub fn evaluate_division(div: &Expression, environment: &Environment) -> i32 {
+    if let Expression::Divide(expressions) = div {
+        if expressions.len() != 2 {
+            panic!("There must only be two operands");
+        }
+        let mut iter = expressions.iter();
+        let first = iter.next().unwrap();
+        iter.fold(evaluate(first, environment), |total, next| total / evaluate(next, environment))
+    } else {
+        panic!("Divide not provided")
+    }
+}
+
 pub fn evaluate_subtraction(sub: &Expression, environment: &Environment) -> i32 {
     if let Expression::Subtract(expressions) = sub {
             let mut iter = expressions.iter();
@@ -62,6 +76,7 @@ fn evaluate(expression: &Expression, environment: &Environment) -> i32 {
         Expression::Add(_) => evaluate_addition(expression, environment),
         Expression::Subtract(_) => evaluate_subtraction(expression, environment),
         Expression::Multiply(_) => evaluate_multiplication(expression, environment),
+        Expression::Divide(_) => evaluate_division(expression, environment),
         Expression::Variable(key) => {
             let expr = environment.value_for_key(key);
             evaluate(expr, environment)
@@ -84,7 +99,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-use crate::{evaluate_addition, evaluate_subtraction, evaluate_multiplication, Expression};
+use crate::{evaluate_addition, evaluate_subtraction, evaluate_multiplication, evaluate_division, Expression};
     #[test]
     fn it_works() {
         assert_eq!(2+2, 4);
@@ -139,10 +154,20 @@ use crate::{evaluate_addition, evaluate_subtraction, evaluate_multiplication, Ex
     }
 
     #[test]
+    fn test_basic_division() {
+        // arrange
+        let values = vec![Expression::Number(216), Expression::Number(6)];
+        // act
+        let quotient = evaluate_division(&Expression::Divide(values), &crate::Environment::new());
+        // assert
+        assert_eq!(quotient, 36);
+    }
+
+    #[test]
     fn test_new_environment() {
         // arrange
         // act
-        let new_env = crate::Environment::new();
+        let mut new_env = crate::Environment::new();
         // assert
         let expr = new_env.value;
         if let crate::Expression::Number(value) = expr {
@@ -181,6 +206,40 @@ use crate::{evaluate_addition, evaluate_subtraction, evaluate_multiplication, Ex
         let value = crate::evaluate(&add, &new_env);
         // assert
         assert_eq!(value, 13);
+    }
+
+    #[test]
+    fn test_division_with_variable() {
+        // arrange
+        let mut new_env = crate::Environment {
+            key: String::from("easter"),
+            value: crate::Expression::Number(90)
+        };
+        let vec = vec![crate::Expression::Number(3150), crate::Expression::Variable(String::from("easter"))];
+        let divide = crate::Expression::Divide(vec);
+        // act
+        let value = crate::evaluate(&divide, &new_env);
+        // assert
+        assert_eq!(value, 35);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_division_with_3_operands() {
+        // arrange
+        let mut new_env = crate::Environment {
+            key: String::from("sunday"),
+            value: crate::Expression::Number(90)
+        };
+        let vec = vec![
+            crate::Expression::Number(3150), 
+            crate::Expression::Variable(String::from("sunday")), 
+            crate::Expression::Number(5)];
+        let divide = crate::Expression::Divide(vec);
+        // act
+        let value = crate::evaluate(&divide, &new_env);
+        // assert
+        // assert_eq!(value, 7); // this actually does work if you remove the panic condition from the evaluate_division method
     }
 
 }
