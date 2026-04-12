@@ -1,3 +1,4 @@
+// Rebecca Fritz
 #[derive(Clone)]
 #[derive(Debug)]
 pub enum Expression {
@@ -85,15 +86,93 @@ fn evaluate(expression: &Expression, environment: &Environment) -> i32 {
     }
 }
 
+pub fn print_addition(add: &Expression, environment: &Environment) {
+    if let Expression::Add(expressions) = add {
+        let mut iter = expressions.iter();
+        print!("{}", &String::from("(+ "));
+        print_expression(iter.next().unwrap(), environment);
+    } else {
+        panic!("Not addition");
+    }
+}
+
+pub fn print_multiplication(mult: &Expression, environment: &Environment) {
+    if let Expression::Multiply(expressions) = mult {
+        let mut iter = expressions.iter();
+        print!("{}", &String::from("(* "));
+        print_expression(iter.next().unwrap(), environment);
+    } else {
+        panic!("Not multiplication");
+    }
+}
+
+pub fn print_division(div: &Expression, environment: &Environment) {
+    if let Expression::Divide(expressions) = div {
+        let mut iter = expressions.iter();
+        print!("{}", &String::from("(/ "));
+        print_expression(iter.next().unwrap(), environment);
+    } else {
+        panic!("Not division");
+    }
+}
+
+pub fn print_subtraction(sub: &Expression, environment: &Environment) {
+    if let Expression::Subtract(expressions) = sub {
+        let mut iter = expressions.iter();
+        print!("{}", &String::from("(- "));
+        print_expression(iter.next().unwrap(), environment);
+    } else {
+        panic!("Not subtraction");
+    }
+}
+
+// pub fn print_parentheses(sub: &Expression, environment: &Environment) {
+//     if let Expression::Subtract(expressions) = par {
+//         panic!("Not parentheses");
+//     }
+// }
+
+fn print_expression(expression: &Expression, environment: &Environment) {
+    match expression {
+        Expression::Add(_) => print_addition(expression, environment),
+        Expression::Subtract(_) => print_subtraction(expression, environment),
+        Expression::Multiply(_) => print_multiplication(expression, environment),
+        Expression::Divide(_) => print_division(expression, environment),
+        Expression::Variable(key) => {
+            let expr = environment.value_for_key(key);
+            print_expression(expression, environment)
+        },
+        Expression::Number(val) => {
+            print!("{}", *val);
+        }
+    }
+}
+
 fn main() {
-    let mut expressions = Vec::new();
-    expressions.push(Expression::Number(3));
-    expressions.push(Expression::Number(4));
-    expressions.push(Expression::Number(5));
-    let add = Expression::Add(expressions);
-    let multiply = Expression::Multiply(vec![add, Expression::Number(2)]);
-    let result = evaluate(&multiply, &Environment::new());
-    println!("The result is {result}");
+    // let mut expressions = Vec::new();
+    // expressions.push(Expression::Number(3));
+    // expressions.push(Expression::Number(4));
+    // expressions.push(Expression::Number(5));
+    // let add = Expression::Add(expressions);
+    // let multiply = Expression::Multiply(vec![add, Expression::Number(2)]);
+    // let result = evaluate(&multiply, &Environment::new());
+    // println!("The result is {result}");
+
+    let expression = Expression::Multiply(vec![
+            Expression::Number(8),
+            Expression::Divide(vec![
+                Expression::Number(5),
+                Expression::Add(vec![
+                    Expression::Number(3),
+                    Expression::Subtract(vec![
+                        Expression::Number(2),
+                        Expression::Number(1)
+                    ])
+                ])
+            ])
+        ]
+    );
+    print_expression(&expression, &Environment::new()); // should get "(* 8 (/ 5 (+ 3 ( - 2 1))))"
 
 }
 
