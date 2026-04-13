@@ -90,7 +90,6 @@ pub fn print_addition(add: &Expression, environment: &Environment) {
     if let Expression::Add(expressions) = add {
         let iter = expressions.iter();
         print!("{}", &String::from(" (+ "));
-
         iter.for_each(|item| {
             print_expression(item, environment);
         });
@@ -147,11 +146,10 @@ fn print_expression(expression: &Expression, environment: &Environment) {
         Expression::Divide(_) => print_division(expression, environment),
         Expression::Variable(key) => {
             let expr = environment.value_for_key(key);
-            print_expression(expression, environment)
+            print_expression(expr, environment)
         },
         Expression::Number(val) => {
-            print!(" ");
-            print!("{}", *val);
+            print!(" {}", *val);
         }
     }
 }
@@ -181,6 +179,30 @@ fn main() {
         ]
     );
     print_expression(&expression, &Environment::new()); // should get "(* 8 (/ 5 (+ 3 ( - 2 1))))"
+
+
+    println!(" ");
+    let mut new_env = crate::Environment {
+            key: String::from("volcanalis"),
+            value: crate::Expression::Number(5)
+        };
+
+
+    let expression = Expression::Multiply(vec![
+            Expression::Number(3),
+            Expression::Divide(vec![
+                crate::Expression::Variable(String::from("volcanalis")),
+                Expression::Add(vec![
+                    Expression::Number(8),
+                    Expression::Subtract(vec![
+                        crate::Expression::Variable(String::from("volcanalis")),
+                        Expression::Number(3)
+                    ])
+                ])
+            ])
+        ]
+    );
+    print_expression(&expression, &new_env); // should get "(* 3 (/ 5 (+ 8 ( - 5 3))))"
 
 }
 
