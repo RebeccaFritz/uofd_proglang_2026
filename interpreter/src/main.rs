@@ -154,6 +154,12 @@ fn print_expression(expression: &Expression, environment: &Environment) {
     }
 }
 
+fn print_environment(environment: &Environment) {
+    print!("(define {}", environment.key);
+    print_expression(&environment.value, environment);
+    print!(")")
+}
+
 fn main() {
     // let mut expressions = Vec::new();
     // expressions.push(Expression::Number(3));
@@ -203,6 +209,9 @@ fn main() {
         ]
     );
     print_expression(&expression, &new_env); // should get "(* 3 (/ 5 (+ 8 ( - 5 3))))"
+
+    println!(" ");
+    print_environment(&new_env); // should get "(define volcanalis 5)"
 
 }
 
