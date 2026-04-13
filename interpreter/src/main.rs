@@ -88,9 +88,13 @@ fn evaluate(expression: &Expression, environment: &Environment) -> i32 {
 
 pub fn print_addition(add: &Expression, environment: &Environment) {
     if let Expression::Add(expressions) = add {
-        let mut iter = expressions.iter();
-        print!("{}", &String::from("(+ "));
-        print_expression(iter.next().unwrap(), environment);
+        let iter = expressions.iter();
+        print!("{}", &String::from(" (+ "));
+
+        iter.for_each(|item| {
+            print_expression(item, environment);
+        });
+        print!("{}", &String::from(")"));
     } else {
         panic!("Not addition");
     }
@@ -98,9 +102,12 @@ pub fn print_addition(add: &Expression, environment: &Environment) {
 
 pub fn print_multiplication(mult: &Expression, environment: &Environment) {
     if let Expression::Multiply(expressions) = mult {
-        let mut iter = expressions.iter();
-        print!("{}", &String::from("(* "));
-        print_expression(iter.next().unwrap(), environment);
+        let iter = expressions.iter();
+        print!("{}", &String::from(" (* "));
+        iter.for_each(|item| {
+            print_expression(item, environment);
+        });
+        print!("{}", &String::from(")"));
     } else {
         panic!("Not multiplication");
     }
@@ -108,9 +115,12 @@ pub fn print_multiplication(mult: &Expression, environment: &Environment) {
 
 pub fn print_division(div: &Expression, environment: &Environment) {
     if let Expression::Divide(expressions) = div {
-        let mut iter = expressions.iter();
-        print!("{}", &String::from("(/ "));
-        print_expression(iter.next().unwrap(), environment);
+        let iter = expressions.iter();
+        print!("{}", &String::from(" (/ "));
+        iter.for_each(|item| {
+            print_expression(item, environment);
+        });
+        print!("{}", &String::from(")"));
     } else {
         panic!("Not division");
     }
@@ -118,19 +128,16 @@ pub fn print_division(div: &Expression, environment: &Environment) {
 
 pub fn print_subtraction(sub: &Expression, environment: &Environment) {
     if let Expression::Subtract(expressions) = sub {
-        let mut iter = expressions.iter();
-        print!("{}", &String::from("(- "));
-        print_expression(iter.next().unwrap(), environment);
+        let iter = expressions.iter();
+        print!("{}", &String::from(" (- "));
+        iter.for_each(|item| {
+            print_expression(item, environment);
+        });
+        print!("{}", &String::from(")"));
     } else {
         panic!("Not subtraction");
     }
 }
-
-// pub fn print_parentheses(sub: &Expression, environment: &Environment) {
-//     if let Expression::Subtract(expressions) = par {
-//         panic!("Not parentheses");
-//     }
-// }
 
 fn print_expression(expression: &Expression, environment: &Environment) {
     match expression {
@@ -143,6 +150,7 @@ fn print_expression(expression: &Expression, environment: &Environment) {
             print_expression(expression, environment)
         },
         Expression::Number(val) => {
+            print!(" ");
             print!("{}", *val);
         }
     }
