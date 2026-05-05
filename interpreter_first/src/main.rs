@@ -280,20 +280,6 @@ use crate::{evaluate_addition, evaluate_subtraction, evaluate_multiplication, ev
         assert_eq!(quotient, 36);
     }
 
-    // #[test]
-    // fn test_new_environment() {
-    //     // arrange
-    //     // act
-    //     let mut new_env = crate::Environment::new();
-    //     // assert
-    //     let expr = new_env.value;
-    //     if let crate::Expression::Number(value) = expr {
-    //         assert_eq!(value, 0);
-    //     } else {
-    //         assert_eq!(1,0);
-    //     }
-    // }
-
     #[test]
     fn test_value_for_key() {
         // arrange
