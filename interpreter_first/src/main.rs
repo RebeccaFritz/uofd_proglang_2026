@@ -1,6 +1,9 @@
 // Rebecca Fritz
-#[derive(Clone)]
-#[derive(Debug)]
+// #[derive(Clone)]
+// #[derive(Debug)]
+
+use std::collections::HashMap;
+
 pub enum Expression {
     Add(Vec<Expression>),
     Subtract(Vec<Expression>),
@@ -11,25 +14,29 @@ pub enum Expression {
 }
 
 pub struct Environment {
-    key: String,
-    value: Expression
+    variables: HashMap<String, Expression>,
 }
 
 impl Environment {
     fn value_for_key(self: &Environment, key: &String) -> &Expression {
-        if &self.key == key {
-            &self.value
+        if let Some(value) = self.variables.get(key) {
+            &value
         } else {
             panic!("key not found in environment");
         }
     }
+
     fn new() -> Environment {
         Environment {
-            key: String::from(""),
-            value: Expression::Number(0),
+            variables: HashMap::new(),
         }
     }
+
+    fn define(self: &mut Environment, key: String, value: Expression) {
+        self.variables.insert(key, value);
+    }
 }
+
 
 pub fn evaluate_addition(add: &Expression, environment: &Environment) -> i32 {
     if let Expression::Add(expressions) = add {
@@ -155,20 +162,14 @@ fn print_expression(expression: &Expression, environment: &Environment) {
 }
 
 fn print_environment(environment: &Environment) {
-    print!("(define {}", environment.key);
-    print_expression(&environment.value, environment);
-    print!(")")
+    for (key, value) in &environment.variables {
+        print!("(define {}", key);
+        print_expression(value, environment);
+        print!(")")
+    }
 }
 
 fn main() {
-    // let mut expressions = Vec::new();
-    // expressions.push(Expression::Number(3));
-    // expressions.push(Expression::Number(4));
-    // expressions.push(Expression::Number(5));
-    // let add = Expression::Add(expressions);
-    // let multiply = Expression::Multiply(vec![add, Expression::Number(2)]);
-    // let result = evaluate(&multiply, &Environment::new());
-    // println!("The result is {result}");
 
     let expression = Expression::Multiply(vec![
             Expression::Number(8),
@@ -188,10 +189,8 @@ fn main() {
 
 
     println!(" ");
-    let mut new_env = crate::Environment {
-            key: String::from("volcanalis"),
-            value: crate::Expression::Number(5)
-        };
+    let mut new_env = Environment::new();
+    new_env.define(String::from("volcanalis"), Expression::Number(5));
 
 
     let expression = Expression::Multiply(vec![
@@ -281,26 +280,25 @@ use crate::{evaluate_addition, evaluate_subtraction, evaluate_multiplication, ev
         assert_eq!(quotient, 36);
     }
 
-    #[test]
-    fn test_new_environment() {
-        // arrange
-        // act
-        let mut new_env = crate::Environment::new();
-        // assert
-        let expr = new_env.value;
-        if let crate::Expression::Number(value) = expr {
-            assert_eq!(value, 0);
-        } else {
-            assert_eq!(1,0);
-        }
-    }
+    // #[test]
+    // fn test_new_environment() {
+    //     // arrange
+    //     // act
+    //     let mut new_env = crate::Environment::new();
+    //     // assert
+    //     let expr = new_env.value;
+    //     if let crate::Expression::Number(value) = expr {
+    //         assert_eq!(value, 0);
+    //     } else {
+    //         assert_eq!(1,0);
+    //     }
+    // }
 
     #[test]
     fn test_value_for_key() {
         // arrange
         let mut new_env = crate::Environment::new();
-        new_env.key = String::from("foo");
-        new_env.value = crate::Expression::Number(2);
+        new_env.define(String::from("foo"), Expression::Number(2));
         // act
         let expr = new_env.value_for_key(&String::from("foo"));
         // assert
@@ -314,10 +312,8 @@ use crate::{evaluate_addition, evaluate_subtraction, evaluate_multiplication, ev
     #[test]
     fn test_addition_with_variable() {
         // arrange
-        let mut new_env = crate::Environment {
-            key: String::from("x"),
-            value: crate::Expression::Number(6)
-        };
+        let mut new_env = crate::Environment::new();
+        new_env.define(String::from("x"), Expression::Number(6));
         let vec = vec![crate::Expression::Number(7), crate::Expression::Variable(String::from("x"))];
         let add = crate::Expression::Add(vec);
         // act
@@ -326,13 +322,11 @@ use crate::{evaluate_addition, evaluate_subtraction, evaluate_multiplication, ev
         assert_eq!(value, 13);
     }
 
-    #[test]
+    #[test] 
     fn test_division_with_variable() {
         // arrange
-        let mut new_env = crate::Environment {
-            key: String::from("easter"),
-            value: crate::Expression::Number(90)
-        };
+        let mut new_env = crate::Environment::new();
+        new_env.define(String::from("easter"), Expression::Number(90));
         let vec = vec![crate::Expression::Number(3150), crate::Expression::Variable(String::from("easter"))];
         let divide = crate::Expression::Divide(vec);
         // act
@@ -345,10 +339,8 @@ use crate::{evaluate_addition, evaluate_subtraction, evaluate_multiplication, ev
     #[should_panic]
     fn test_division_with_3_operands() {
         // arrange
-        let mut new_env = crate::Environment {
-            key: String::from("sunday"),
-            value: crate::Expression::Number(90)
-        };
+        let mut new_env = crate::Environment::new();
+        new_env.define(String::from("sunday"), Expression::Number(90));
         let vec = vec![
             crate::Expression::Number(3150), 
             crate::Expression::Variable(String::from("sunday")), 
@@ -360,4 +352,30 @@ use crate::{evaluate_addition, evaluate_subtraction, evaluate_multiplication, ev
         // assert_eq!(value, 7); // this actually does work if you remove the panic condition from the evaluate_division method
     }
 
+    #[test]
+    fn test_expression_multiple_variables() {
+        // arrange
+        let mut new_env = crate::Environment::new();
+        new_env.define(String::from("rusty"), Expression::Number(1));
+        new_env.define(String::from("rubber"), Expression::Number(2));
+        new_env.define(String::from("duck"), Expression::Number(3));
+        new_env.define(String::from("rabid"), Expression::Number(4));
+        new_env.define(String::from("razor"), Expression::Number(5));
+
+        let expression = Expression::Multiply(vec![
+            crate::Expression::Variable(String::from("razor")),
+            Expression::Divide(vec![
+                crate::Expression::Variable(String::from("rabid")),
+                Expression::Add(vec![
+                    crate::Expression::Variable(String::from("duck")), 
+                    Expression::Subtract(vec![
+                        crate::Expression::Variable(String::from("rusty")), 
+                        crate::Expression::Variable(String::from("rubber"))])])])]);
+
+        // act
+        let value = crate::evaluate(&expression, &new_env);
+
+        // assert
+        assert_eq!(value, 10);
+    }
 }
